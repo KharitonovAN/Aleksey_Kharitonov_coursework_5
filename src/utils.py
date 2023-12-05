@@ -1,5 +1,6 @@
 import psycopg2
 import requests
+from config import config
 
 
 def get_vacancies(employer_id):
@@ -41,10 +42,15 @@ def get_employer(employer_id):
     return hh_company
 
 
-def create_table():
+def database_connect():
+    """Подключение к базе данных"""
+    db_params = config
+    return db_params
+
+
+def create_table(params):
     """Создание БД, созданение таблиц"""
-    conn = psycopg2.connect(host="localhost", database="postgres",
-                            user="postgres", password="1234")
+    conn = psycopg2.connect(dbbase="postgres", **params)
     conn.autocommit = True
     cur = conn.cursor()
     cur.execute('DROP DATABASE IF EXISTS coursework_5')
