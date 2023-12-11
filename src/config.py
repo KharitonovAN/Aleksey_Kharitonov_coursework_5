@@ -2,7 +2,7 @@ import configparser
 
 
 def config(filename="database.ini", section="postgresql"):
-    """"""
+    """Функция считывания базы дынных в .ini"""
     config = configparser.ConfigParser()
     config.read(filename)
     db = {}
@@ -13,3 +13,9 @@ def config(filename="database.ini", section="postgresql"):
     else:
         raise Exception("Данный параметр не найден")
     return db
+
+
+def database_connect():
+    """Подключение к базе данных"""
+    db_params = config
+    return db_params

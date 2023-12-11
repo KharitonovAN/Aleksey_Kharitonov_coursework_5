@@ -1,12 +1,13 @@
 import psycopg2
 import requests
-from config import config
+from config import database_connect
+
+db_params = database_connect
 
 
 def get_vacancies(employer_id):
     """Получение данных вакансий по API"""
     params = {
-        'area': 1,
         'page': 0,
         'per_page': 10
     }
@@ -40,12 +41,6 @@ def get_employer(employer_id):
         }
 
     return hh_company
-
-
-def database_connect():
-    """Подключение к базе данных"""
-    db_params = config
-    return db_params
 
 
 def create_table(params):
