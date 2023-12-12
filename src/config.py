@@ -13,9 +13,3 @@ def config(filename="database.ini", section="postgresql"):
     else:
         raise Exception("Данный параметр не найден")
     return db
-
-
-def database_connect():
-    """Подключение к базе данных"""
-    db_params = config
-    return db_params

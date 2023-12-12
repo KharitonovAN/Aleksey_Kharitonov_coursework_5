@@ -1,13 +1,14 @@
 import psycopg2
 import requests
-from config import database_connect
+from config import config
 
-db_params = database_connect
+db_params = config()
 
 
 def get_vacancies(employer_id):
     """Получение данных вакансий по API"""
     params = {
+        'area': 1,
         'page': 0,
         'per_page': 10
     }
@@ -16,17 +17,19 @@ def get_vacancies(employer_id):
 
     vacancies_data = []
     for item in data_vacancies["items"]:
-        hh_vacancies = {
-            'vacancy_id': int(item['id']),
-            'vacancies_name': item['name'],
-            'payment': item["salary"]["from"] if item["salary"] else None,
-            'requirement': item['snippet']['requirement'],
-            'vacancies_url': item['alternate_url'],
-            'employer_id': employer_id
-        }
-        if hh_vacancies['payment'] is not None:
-            vacancies_data.append(hh_vacancies)
+        if item is None:
+            continue
+        else:
+            hh_vacancies = {
+                'vacancy_id': int(item['id']),
+                'vacancies_name': item['name'],
+                'payment': item["salary"]["from"] if item["salary"] else None,
+                'requirement': item['snippet']['requirement'],
+                'vacancies_url': item['alternate_url'],
+                'employer_id': employer_id
+            }
 
+        vacancies_data.append(hh_vacancies)
         return vacancies_data
 
 
@@ -39,20 +42,19 @@ def get_employer(employer_id):
         'company_name': data_vacancies['name'],
         'open_vacancies': data_vacancies['open_vacancies']
         }
-
     return hh_company
 
 
-def create_table(params):
+def create_table():
     """Создание БД, созданение таблиц"""
-    conn = psycopg2.connect(dbbase="postgres", **params)
+    conn = psycopg2.connect(dbname="postgres", **db_params)
     conn.autocommit = True
     cur = conn.cursor()
     cur.execute('DROP DATABASE IF EXISTS coursework_5')
     cur.execute('CREATE DATABASE coursework_5')
+    cur.close()
     conn.close()
-    conn = psycopg2.connect(host="localhost", database="coursework_5",
-                            user="postgres", password="1234")
+    conn = psycopg2.connect(dbname="coursework_5", **db_params)
     with conn.cursor() as cur:
         cur.execute('''
                     CREATE TABLE employers (
@@ -76,8 +78,7 @@ def create_table(params):
 
 def add_to_table(employers_list):
     """Заполнение базы данных компании и вакансии"""
-    with psycopg2.connect(host="localhost", database="coursework_5",
-                          user="postgres", password="1234") as conn:
+    with psycopg2.connect(dbname="coursework_5", **db_params) as conn:
         with conn.cursor() as cur:
             cur.execute('TRUNCATE TABLE employers, vacancies RESTART IDENTITY;')
 
